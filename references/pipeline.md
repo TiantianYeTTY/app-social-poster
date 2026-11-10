@@ -4,6 +4,8 @@
 
 - macOS（字体路径 `/System/Library/Fonts/Hiragino Sans GB.ttc` 实测可用；
   系统里**没有可直接读的 PingFang.ttc**，别去找）。
+- **得意黑（v2 主字体）**：`~/Library/Fonts/smiley-sans-v2/SmileySans-Oblique.ttf`（用户已装）；
+  换机器没有就先下载安装，别退回系统黑体（会重新带上 AI 味）。
 - Python 3 + Pillow（实测 12.3.0）。`python3 -c "from PIL import Image; print(Image.__version__)"`。
 - `/usr/bin/sips -g pixelWidth -g pixelHeight <file>` 量尺寸。
 
@@ -48,54 +50,59 @@ config 字段说明见 `examples/config.example.json` 与 `app-profiles.md`。
 ## 质检清单（Stage 4，逐条执行）
 
 ### 1. 目视总览
-`00_整套总览.jpg`：标题不裁切、不重叠；品牌条只有 APP 名；序号连续；
-底部四个圆按钮完整（标准档）；放大档底部是有意出血。
+`00_整套总览.jpg`：大字不裁切、不重叠；左上角品牌贴纸每张都有、功能贴纸不与品牌重复且不压字；
+手机按钮要么完整在画布内、要么整体出血出画（画面内裁半截才不合格）；
+6 张构图左右交替、不是同一版式复制。
 
 ### 2. 「一 / 二」扁字
 ```bash
 python3 - <<'PY'
 from PIL import Image
 im = Image.open("02_xxx.png")
-box = (110, 200, 1250, 470)
+box = (1100, 540, 2050, 900)
 im.crop(box).save("/tmp/check_yi.png")
 PY
 ```
 放大看那一横是否**居于字格中间**、与相邻汉字视觉重心齐平，而不是贴顶的上划线。
 
-### 3. 阴影连续性（数值验证，不靠肉眼）
+### 3. 阴影连续性 + 背景颜色（数值验证，不靠肉眼）
 ```bash
 python3 - <<'PY'
 from PIL import Image
 im = Image.open("01_xxx.png").convert("RGB")
+print("四角:", [im.getpixel(q) for q in [(30,30),(2130,30),(30,2850),(30,1440)]])
 for y in (1200, 1500, 1900):
     vals = [int(sum(im.getpixel((x,y)))/3) for x in range(360, 580, 10)]
     diffs = [abs(vals[i+1]-vals[i]) for i in range(len(vals)-1)]
-    print(y, vals, "max jump", max(diffs))
+    print(y, "max jump", max(diffs))
 PY
 ```
-定稿合格值：`117→94` 单调平滑，相邻 10px 跳变 ≤2（背景色本身随 y 变化，同一水平线恒定）。
-出现 ≥20 的阶跃 = 阴影被硬裁，回去检查 `pad`。
+背景四角必须是蓝色渐变（曾因噪点叠加写错整图变黑，错误档案 #22）；
+阴影相邻 10px 跳变 ≤2，出现 ≥20 的阶跃 = 阴影被硬裁，回去检查 `pad`。
 
 ### 4. 红线 grep（生成脚本 + config + 文案一起查）
 ```bash
-grep -nE "YELLOW|FFE24A|255, ?226" 脚本 config
-grep -nE "CLASS ASSISTANT|听课助手水课帮|助手水课帮|水课帮听课助手" config 发布文案.md
-grep -nE "for ch in .*:.*d\.text|draw_segments" 脚本
+grep -nE "YELLOW|FFE24A|255, ?226" 脚本 config            # 黄色残留
+grep -nE "01 / |index_y|glow|rings" 脚本 config            # 序号/光晕/圆环（v1 AI味残留）
+grep -nE "CLASS ASSISTANT|听课助手水课帮|助手水课帮" config 发布文案.md
+grep -nE "for ch in .*:.*d\.text|draw_segments" 脚本        # 逐字绘制
+grep -niE "\bapp\b|app store|下载|链接|安装|上架" config 发布文案.md   # 限流词
 ```
-前两条归零；第三条（逐字绘制）不得出现。
+全部归零。
 
-**文案两道检查**（用户第 5、6 轮返工，必做）：
+**文案三道检查**（用户第 5、6、7 轮返工，必做）：
 ```bash
-# ① 原创：案例禁用短语逐条比对（清单见 copywriting-playbook.md §〇-B）
+# ① 防限流：限流词归零（见上）；宣传只做 钩子→报品牌名→讲核心功能
+# ② 原创：案例禁用短语逐条比对（清单见 copywriting-playbook.md §〇-C）
 grep -nF -e "把上课交给AI，把时间还给自己" -e "谁懂啊" -e "线下课实时收音" \
          -e "一键开始摸鱼" -e "做了个防止课堂提问的小软件" 发布文案.md config.json
-# ② 功能准确性：出现左边这些词即为写错，按 §〇-C 映射表改
+# ③ 功能准确性：出现左边这些词即为写错，按 §〇-D 映射表改
 grep -nE "小组件|没听清的题|智能分段|不保存课堂音频|不上传第三方" 发布文案.md config.json
 ```
-两处都应归零（用户定稿句与用户点名钩子词除外）。
+都应归零（用户定稿句与用户点名钩子词除外）。
 
 ### 5. 交付清单
-`ls` 输出目录：`01_..png` … `0N_..png`、`00_整套总览.jpg`、`发布文案.md`（七节）、可复跑脚本。
+`ls` 输出目录：`01_..png` … `0N_..png`、`00_整套总览.jpg`、`发布文案.md`（**2 组：标题+正文**）、可复跑脚本。
 
 ## 技术坑速查
 
@@ -104,8 +111,10 @@ grep -nE "小组件|没听清的题|智能分段|不保存课堂音频|不上传
 | 逐字符绘制 | 「一」变上划线 | 整行一次 `draw.text` |
 | 在 `phone.size` 上模糊 | 阴影四边硬切断 | `pad = blur×3.2`，放大画布上模糊再贴回 |
 | 边框自带岛 + 截图自带岛 | 两个灵动岛错位 | `keep_island=False` 时用 clean 边框 |
-| 手机宽 1120 | 底部按钮被裁半截 | 标准档固定 1030 |
-| 加深背景却没减光晕 | 顶部仍浅，像没改 | 光晕 fill 70/42、乘 0.30 |
+| `composite_at` 系返回值没接收 | 贴纸/手机**静默丢失**，画面少元素 | `im = paste_sticker(...)` / `im = add_phone(...)`；粘贴后再画字要重新 `ImageDraw.Draw(im)` |
+| 噪点叠加写错 offset | **整图变纯黑** | 对称写法：先 `add(im, subtract(noise, mid128))` 再 `subtract(im, subtract(mid128, noise))`；noise 转 RGB；出图后采样四角像素验证 |
+| 边框 `island_clear` 范围太小 | 淡阴影残留能看到岛影 | 清 `(420,85)–(930,360)`（比岛大一圈） |
+| 手机在画面内被裁一半按钮 | 看着"断掉" | 要么完整在画布内，要么整体出血出画（v2 出血构图合法） |
 | 截图尺寸不统一 | 屏幕内容被拉伸 | 统一 resize 到 `screen_box` 尺寸 |
 | 圆角处露出方形截图角 | 屏幕四角发白/发灰 | 截图 alpha 乘圆角 mask（半径 145） |
 | 换文案后旧图残留 | 目录里两套图 | `main()` 自动删 `^\d{2}_.*\.png$` |
