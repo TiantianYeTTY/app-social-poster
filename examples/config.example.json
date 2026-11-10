@@ -1,0 +1,93 @@
+{
+  "_说明": "复制本文件到本次工作目录，替换所有 /ABS/PATH 占位路径，并按 app-profiles.md 重写 posters。正式名称仅用于文案，图上品牌条只显示 app_name。",
+
+  "app_name": "水课帮",
+  "official_name": "水课帮 - 课堂提问助手",
+  "src_dir": "/ABS/PATH/TO/iPhone素材",
+  "out_dir": "/ABS/PATH/TO/输出目录",
+  "frame_path": "/ABS/PATH/TO/iPhone素材/iPhone边框.png",
+
+  "canvas": [2160, 2880],
+  "margin": 140,
+  "colors": {
+    "top": [30, 126, 244],
+    "bottom": [8, 74, 202],
+    "glow": {
+      "ellipse1": [-620, -780, 1250, 880],
+      "fill1": 70,
+      "ellipse2": [1250, 1750, 2950, 3450],
+      "fill2": 42,
+      "blur": 210,
+      "opacity": 0.30
+    },
+    "rings": [
+      [1480, -520, 2860, 860, 26, 4],
+      [1640, -360, 2700, 700, 18, 3]
+    ]
+  },
+
+  "font": {
+    "path": "/System/Library/Fonts/Hiragino Sans GB.ttc",
+    "bold_index": 2,
+    "regular_index": 0
+  },
+
+  "layout": {
+    "brand_y": 88,
+    "brand_size": 88,
+    "index_y": 136,
+    "index_size": 44,
+    "headline_y": [225, 465],
+    "headline_size": 208,
+    "headline_stroke": 2,
+    "bar_top": 715,
+    "bar_bottom": 727,
+    "bar_width": 122,
+    "sub_y": 755,
+    "sub_size": 76,
+    "sub_stroke": 1,
+    "phone_top": 870
+  },
+
+  "frame": {
+    "_说明": "screen_box 必须用 pipeline.md 的像素扫描法实测，禁止照抄不同机型的数值",
+    "size": [1350, 2760],
+    "screen_box": [72, 69, 1278, 2691],
+    "screen_radius": 145,
+    "island_clear": [420, 85, 930, 360]
+  },
+
+  "shadow": {
+    "layers": [
+      [88, 0.40, 8, 56, [2, 20, 62]],
+      [24, 0.18, 4, 20, [1, 14, 48]]
+    ]
+  },
+
+  "footer_lines": [
+    "水课帮  ·  再也不怕被点名",
+    "Designed by TiantianYe"
+  ],
+
+  "_posters说明": "以下为水课帮定稿结构示例，换 APP 时整段重写；width 只用 1030 / 1420 / 900 三档",
+  "posters": [
+    {"name": "大学生上课摸鱼助手", "shot": "核心功能展示.png", "keep_island": true,
+     "l1": "大学生", "l2": "上课摸鱼助手", "sub": "再也不怕老师随机点名提问",
+     "width": 1030, "dx": 0},
+    {"name": "一键开始剩下的交给它", "shot": "首页展示.png", "keep_island": true,
+     "l1": "一键开始", "l2": "剩下的交给它", "sub": "实时课堂识别，老师问了什么自动捞出来",
+     "width": 1030, "dx": 0},
+    {"name": "点名一来手机先知道", "shot": "灵动岛功能.PNG", "keep_island": false,
+     "l1": "点名一来", "l2": "手机先知道", "sub": "灵动岛 / 实时活动 / 通知提醒 / 震动提醒",
+     "width": 1420, "dx": 68},
+    {"name": "点名点到我", "shot": "AI功能1.PNG", "keep_island": false,
+     "l1": "点名点到我", "l2": "答案已经在了", "sub": "不会做的题，一键交给豆包、千问",
+     "width": 1420, "dx": -68},
+    {"name": "中英课堂都听得懂", "shot": "设置页，支持中英.png", "keep_island": true,
+     "l1": "中英课堂", "l2": "都听得懂", "sub": "英语听说课也不怕，提问还有震动提醒",
+     "width": 1030, "dx": 0},
+    {"name": "你在走神它替你听着", "shot": "AI功能2.PNG", "keep_island": false,
+     "l1": "你在走神", "l2": "它替你听着", "sub": "水课帮 · 提问、答案、提醒全都有",
+     "width": 900, "dx": 0, "footer": true}
+  ]
+}
