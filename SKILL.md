@@ -131,6 +131,6 @@ python3 ~/.workbuddy/skills/app-social-poster/scripts/make_posters.py --config /
 - 每轮改完主动说明「改了什么 / 为什么 / 验证结果」，要点式，不长篇。
 - 交付后更新记忆日志；本 skill 本身不自动发布到 GitHub。
 - 用户下达「开源到 GitHub / 发布」时，指令本身即确认，按 `skill-distiller` Stage 5 九步执行：
-  脱敏扫描 0 命中 → README 固定模板（不写平台品牌、不写内部过程）→ MIT LICENSE + .gitignore →
+  脱敏扫描 0 命中 → README 固定模板（不写平台品牌、不写内部过程）→ CC BY-SA 4.0 LICENSE + .gitignore →
   脚本署名检查 → 本地 git 身份 `Tiantian Ye <13585886743@163.com>` → `gh repo create` → `gh api` 核对 →
   push 被拒用 rebase 合并、**禁止 force push** → 交付仓库 URL。

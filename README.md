@@ -6,7 +6,7 @@
 >
 > 作者：**TiantianYe**
 >
-> 作者在 App Store 中的其他代表作品：水课帮-课堂提问助手；识词本-单词笔记；投影与视图3D教具；解构照片
+> 作者在 App Store 中的其他代表作品：水课帮-课堂提问助手；识词本-单词笔记；投影与视图3D教具；实验数据拟合；解构照片
 
 ---
 
@@ -103,7 +103,7 @@ App 名称 / 定位 / 描述 ─┘      00_整套总览.jpg
 app-social-poster/
 ├── SKILL.md                          # 主流程、输入、红线速查（≤150 行）
 ├── README.md                         # 本文件
-├── LICENSE                           # MIT
+├── LICENSE                           # CC BY-SA 4.0
 ├── references/
 │   ├── design-spec.md                # 定稿视觉规格 v2：去AI化六件套 / 色值 / 贴纸 / 手绘线 / 手机布局
 │   ├── format-rules.md               # 硬规则 + 错误档案（含用户反馈原话）+ 来源判定表
@@ -132,10 +132,10 @@ app-social-poster/
 
 **TiantianYe**
 
-作者在 App Store 中的其他代表作品：水课帮-课堂提问助手；识词本-单词笔记；投影与视图3D教具；解构照片。
+作者在 App Store 中的其他代表作品：水课帮-课堂提问助手；识词本-单词笔记；投影与视图3D教具；实验数据拟合；解构照片。
 
 欢迎通过 Issue 反馈问题，或提交 PR 完善工作流。
 
 ## 📄 许可
 
-[MIT](./LICENSE)
+[CC BY-SA 4.0](./LICENSE)
