@@ -45,7 +45,7 @@ DEFAULTS = {
     },
     "shadow": {"blur": 80, "opacity": 0.38, "dx": 6, "dy": 48, "color": [2, 20, 62]},
     "sticker": {
-        "pad_x": 44, "pad_y": 26, "radius": 34, "fill": [255, 255, 255, 246],
+        "pad_x": 52, "pad_y": 30, "radius": 40, "fill": [255, 255, 255, 246],
         "shadow_blur": 14, "shadow_opacity": 0.28,
     },
 }
@@ -191,12 +191,17 @@ def hand_line(d, p1, p2, width, color, seed, wobble=7):
 
 
 def make_sticker(cfg, text, size, tilt):
-    """白色贴纸：白底圆角 + 深蓝得意黑字 + 微旋转。"""
+    """白色贴纸：白底圆角 + 深蓝得意黑字 + 微旋转。
+
+    居中做法：textbbox 返回墨迹精确 bbox，卡片 = 墨迹 + 四边等宽 padding，
+    文字锚点反推 → 上下左右严格居中。严禁高度再「+N 留余量」：
+    余量全落底部，文字会整体偏上（错误档案 #23）。
+    """
     st = cfg["sticker"]
     tmp = ImageDraw.Draw(Image.new("RGBA", (10, 10)))
     box = tmp.textbbox((0, 0), text, font=fs(cfg, size))
     tw, th = box[2] - box[0], box[3] - box[1]
-    card = Image.new("RGBA", (tw + st["pad_x"] * 2, th + st["pad_y"] * 2 + 14), (0, 0, 0, 0))
+    card = Image.new("RGBA", (tw + st["pad_x"] * 2, th + st["pad_y"] * 2), (0, 0, 0, 0))
     cd = ImageDraw.Draw(card)
     cd.rounded_rectangle((0, 0, card.width - 1, card.height - 1),
                          radius=st["radius"], fill=tuple(st["fill"]))
@@ -247,10 +252,10 @@ def make_poster(cfg, p, idx, total, frame, clean):
               16, WHITE, seed=1000 + idx, wobble=6)
 
     # 贴纸：品牌（每张必有）+ 功能词（可选，同图不与品牌重复）
-    brand = make_sticker(cfg, cfg["app_name"], 72, -4)
+    brand = make_sticker(cfg, cfg["app_name"], 96, -4)
     im = paste_sticker(cfg, im, brand, 128, 108)
     if p.get("tag"):
-        tag = make_sticker(cfg, p["tag"], 64, p.get("tag_tilt", -5))
+        tag = make_sticker(cfg, p["tag"], 96, p.get("tag_tilt", -5))
         im = paste_sticker(cfg, im, tag, p.get("tag_x", tx + 40),
                            p.get("tag_y", y_line + 130))
 
@@ -263,7 +268,7 @@ def make_poster(cfg, p, idx, total, frame, clean):
     # 收尾卡：右下角得意黑落款（不居中、不拉条）
     if p.get("footer"):
         d = ImageDraw.Draw(im, "RGBA")
-        d.text((W - 170, 2700), cfg["app_name"], font=fs(cfg, 96), fill=WHITE,
+        d.text((W - 170, 2680), cfg["app_name"], font=fs(cfg, 110), fill=WHITE,
                anchor="rt", stroke_width=2, stroke_fill=WHITE)
 
     path = os.path.join(cfg["out_dir"], f"{idx:02d}_{p['name']}.png")

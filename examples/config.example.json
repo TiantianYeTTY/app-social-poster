@@ -1,67 +1,183 @@
 {
   "_说明": "复制本文件到本次工作目录，替换所有 /ABS/PATH 占位路径，并按 app-profiles.md 重写 posters。v2 去AI化版：得意黑大字 + 贴纸 + 马克笔线 + 手机微旋转 + 背景噪点；图上文字禁出现 APP/App Store/下载 等限流词（脚本会拦截）。",
-
   "app_name": "水课帮",
   "official_name": "水课帮 - 课堂提问助手",
   "src_dir": "/ABS/PATH/TO/iPhone素材",
   "out_dir": "/ABS/PATH/TO/输出目录",
   "frame_path": "/ABS/PATH/TO/iPhone素材/iPhone边框.png",
-
-  "canvas": [2160, 2880],
+  "canvas": [
+    2160,
+    2880
+  ],
   "colors": {
-    "top": [30, 126, 244],
-    "bottom": [8, 74, 202],
-    "ink_blue": [18, 78, 190],
+    "top": [
+      30,
+      126,
+      244
+    ],
+    "bottom": [
+      8,
+      74,
+      202
+    ],
+    "ink_blue": [
+      18,
+      78,
+      190
+    ],
     "noise_sigma": 9
   },
-
   "font": {
     "smiley": "/Users/tiantianye/Library/Fonts/smiley-sans-v2/SmileySans-Oblique.ttf",
     "hei": "/System/Library/Fonts/Hiragino Sans GB.ttc",
     "hei_bold_index": 2
   },
-
   "frame": {
     "_说明": "screen_box 必须用 pipeline.md 的像素扫描法实测，禁止照抄不同机型的数值",
-    "size": [1350, 2760],
-    "screen_box": [72, 69, 1278, 2691],
+    "size": [
+      1350,
+      2760
+    ],
+    "screen_box": [
+      72,
+      69,
+      1278,
+      2691
+    ],
     "screen_radius": 145,
-    "island_clear": [420, 85, 930, 360]
+    "island_clear": [
+      420,
+      85,
+      930,
+      360
+    ]
   },
-
   "shadow": {
     "blur": 80,
     "opacity": 0.38,
     "dx": 6,
     "dy": 48,
-    "color": [2, 20, 62]
+    "color": [
+      2,
+      20,
+      62
+    ]
   },
-
-  "_posters说明": "v2 字段：l1/l2=两行大字（行1≤5字 行2≤9字），size1/size2=字号，tx/ty=文字区起点，tag/tag_x/tag_y/tag_tilt=功能贴纸（不得与品牌名重复），width/px/top/tilt=手机宽/横坐标/顶部y/旋转角。构图左右交替（手机在左 px 小、在右 px 大）。以下为水课帮定稿示例，换 APP 时整段重写。",
+  "_posters说明": "v2.1 字段：l1/l2=两行大字（行1≤5字 行2≤9字），size1/size2=字号（贴纸字号固定 96），tx/ty=文字区起点，tag/tag_x/tag_y/tag_tilt=功能贴纸（不得与品牌名重复），width/px/top/tilt=手机宽/横坐标/顶部y/旋转角。构图左右交替。以下为水课帮定稿示例，换 APP 时整段重写。",
   "posters": [
-    {"name": "上课摸鱼", "shot": "核心功能展示.png", "keep_island": true,
-     "l1": "上课摸鱼", "l2": "再也不怕被点名！", "size1": 250, "size2": 132,
-     "tx": 150, "ty": 380, "tag": "防点名", "tag_x": 215, "tag_y": 985, "tag_tilt": -6,
-     "width": 1080, "px": 1060, "top": 1020, "tilt": 2.2},
-    {"name": "一键开始", "shot": "首页展示.png", "keep_island": true,
-     "l1": "一键开始", "l2": "剩下的交给它", "size1": 190, "size2": 150,
-     "tx": 1130, "ty": 560, "l2_dx": 0, "tag": "挂机听课", "tag_x": 1150, "tag_y": 1120, "tag_tilt": 4,
-     "width": 1010, "px": 90, "top": 1080, "tilt": -2.0},
-    {"name": "点名预警", "shot": "灵动岛功能.PNG", "keep_island": false,
-     "l1": "点名预警", "l2": "手机先知道", "size1": 220, "size2": 150,
-     "tx": 150, "ty": 270, "tag": "不用盯屏幕", "tag_x": 160, "tag_y": 880, "tag_tilt": 5,
-     "width": 1330, "px": 680, "top": 1000, "tilt": -1.6},
-    {"name": "被点到了", "shot": "AI功能1.PNG", "keep_island": false,
-     "l1": "被点到了？", "l2": "答案已经在了", "size1": 190, "size2": 140,
-     "tx": 130, "ty": 520, "tag": "AI帮答", "tag_x": 175, "tag_y": 1085, "tag_tilt": -4,
-     "width": 1330, "px": 830, "top": 1020, "tilt": 2.0},
-    {"name": "英语课也稳", "shot": "设置页，支持中英.png", "keep_island": true,
-     "l1": "英语课", "l2": "也听得懂", "size1": 230, "size2": 190,
-     "tx": 1170, "ty": 620, "tag": "中英双语", "tag_x": 1190, "tag_y": 1240, "tag_tilt": 3,
-     "width": 1010, "px": 90, "top": 1120, "tilt": -1.8},
-    {"name": "摸鱼自由", "shot": "AI功能2.PNG", "keep_island": false,
-     "l1": "摸鱼自由", "l2": "把时间还给自己", "size1": 250, "size2": 150,
-     "tx": 150, "ty": 330, "tag": null,
-     "width": 960, "px": 600, "top": 1150, "tilt": 1.8, "footer": true}
-  ]
+    {
+      "name": "上课摸鱼",
+      "shot": "核心功能展示.png",
+      "keep_island": true,
+      "l1": "上课摸鱼",
+      "l2": "再也不怕被点名！",
+      "size1": 280,
+      "size2": 150,
+      "tx": 150,
+      "ty": 380,
+      "tag": "防点名",
+      "tag_x": 215,
+      "tag_y": 1000,
+      "tag_tilt": -6,
+      "width": 1080,
+      "px": 1060,
+      "top": 1020,
+      "tilt": 2.2
+    },
+    {
+      "name": "一键开始",
+      "shot": "首页展示.png",
+      "keep_island": true,
+      "l1": "一键开始",
+      "l2": "剩下的交给它",
+      "size1": 215,
+      "size2": 170,
+      "tx": 1130,
+      "ty": 560,
+      "l2_dx": 0,
+      "tag": "挂机听课",
+      "tag_x": 1150,
+      "tag_y": 1120,
+      "tag_tilt": 4,
+      "width": 1010,
+      "px": 90,
+      "top": 1080,
+      "tilt": -2.0
+    },
+    {
+      "name": "点名预警",
+      "shot": "灵动岛功能.PNG",
+      "keep_island": false,
+      "l1": "点名预警",
+      "l2": "手机先知道",
+      "size1": 250,
+      "size2": 170,
+      "tx": 150,
+      "ty": 310,
+      "tag": "不用盯屏幕",
+      "tag_x": 1560,
+      "tag_y": 200,
+      "tag_tilt": 5,
+      "width": 1330,
+      "px": 680,
+      "top": 1000,
+      "tilt": -1.6
+    },
+    {
+      "name": "被点到了",
+      "shot": "AI功能1.PNG",
+      "keep_island": false,
+      "l1": "被点到了？",
+      "l2": "答案已经在了",
+      "size1": 215,
+      "size2": 150,
+      "tx": 130,
+      "ty": 520,
+      "tag": "AI帮答",
+      "tag_x": 175,
+      "tag_y": 1085,
+      "tag_tilt": -4,
+      "width": 1330,
+      "px": 830,
+      "top": 1060,
+      "tilt": 2.0
+    },
+    {
+      "name": "英语课也稳",
+      "shot": "设置页，支持中英.png",
+      "keep_island": true,
+      "l1": "英语课",
+      "l2": "也听得懂",
+      "size1": 260,
+      "size2": 215,
+      "tx": 1170,
+      "ty": 620,
+      "tag": "中英双语",
+      "tag_x": 1190,
+      "tag_y": 1270,
+      "tag_tilt": 3,
+      "width": 1010,
+      "px": 90,
+      "top": 1120,
+      "tilt": -1.8
+    },
+    {
+      "name": "摸鱼自由",
+      "shot": "AI功能2.PNG",
+      "keep_island": false,
+      "l1": "摸鱼自由",
+      "l2": "把时间还给自己",
+      "size1": 280,
+      "size2": 170,
+      "tx": 150,
+      "ty": 330,
+      "tag": null,
+      "width": 960,
+      "px": 600,
+      "top": 1150,
+      "tilt": 1.8,
+      "footer": true
+    }
+  ],
+  "sticker_note": "贴纸字号 96（品牌与功能词统一），pad 52/30，文字按墨迹 bbox 四边严格居中"
 }
