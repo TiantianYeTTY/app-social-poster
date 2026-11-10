@@ -157,6 +157,18 @@ def composite_at(base, overlay, x, y):
     return Image.alpha_composite(base, layer)
 
 
+def atomic_save(im, path, fmt, **kw):
+    """原子保存：先写临时文件再 os.replace。
+
+    治本「Finder 预览变黑」：直接 save 到目标路径时，QuickLook 可能在
+    写入中途抓到半成品帧并缓存成黑色缩略图；原子替换保证目标路径上
+    永远只有完整文件。
+    """
+    tmp = path + ".tmp"
+    im.save(tmp, fmt, **kw)
+    os.replace(tmp, path)
+
+
 def soft_shadow(canvas, phone, x, y, blur, opacity, dx, dy, color):
     """带 pad 高斯阴影：模糊在放大画布上做，四边自然衰减到 0，禁止硬边。"""
     pad = int(blur * 3.2)
@@ -252,10 +264,10 @@ def make_poster(cfg, p, idx, total, frame, clean):
               16, WHITE, seed=1000 + idx, wobble=6)
 
     # 贴纸：品牌（每张必有）+ 功能词（可选，同图不与品牌重复）
-    brand = make_sticker(cfg, cfg["app_name"], 96, -4)
-    im = paste_sticker(cfg, im, brand, 128, 108)
+    brand = make_sticker(cfg, cfg["app_name"], 116, -4)
+    im = paste_sticker(cfg, im, brand, 120, 96)
     if p.get("tag"):
-        tag = make_sticker(cfg, p["tag"], 96, p.get("tag_tilt", -5))
+        tag = make_sticker(cfg, p["tag"], 116, p.get("tag_tilt", -5))
         im = paste_sticker(cfg, im, tag, p.get("tag_x", tx + 40),
                            p.get("tag_y", y_line + 130))
 
@@ -268,11 +280,11 @@ def make_poster(cfg, p, idx, total, frame, clean):
     # 收尾卡：右下角得意黑落款（不居中、不拉条）
     if p.get("footer"):
         d = ImageDraw.Draw(im, "RGBA")
-        d.text((W - 170, 2680), cfg["app_name"], font=fs(cfg, 110), fill=WHITE,
+        d.text((W - 170, 2660), cfg["app_name"], font=fs(cfg, 120), fill=WHITE,
                anchor="rt", stroke_width=2, stroke_fill=WHITE)
 
     path = os.path.join(cfg["out_dir"], f"{idx:02d}_{p['name']}.png")
-    im.convert("RGB").save(path, "PNG", optimize=True)
+    atomic_save(im.convert("RGB"), path, "PNG", optimize=True)
     print("saved:", os.path.basename(path), f"{os.path.getsize(path)/1024/1024:.2f} MB")
     return path
 
@@ -306,7 +318,7 @@ def main():
     for i, p in enumerate(paths):
         thumb = Image.open(p).resize((tw, th), Image.LANCZOS)
         sheet.paste(thumb, (10 + (i % 3) * (tw + 10), 10 + (i // 3) * (th + 10)))
-    sheet.save(os.path.join(cfg["out_dir"], "00_整套总览.jpg"), "JPEG", quality=90)
+    atomic_save(sheet, os.path.join(cfg["out_dir"], "00_整套总览.jpg"), "JPEG", quality=90)
     print("saved: 00_整套总览.jpg")
 
 
