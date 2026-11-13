@@ -12,6 +12,9 @@
    白色贴纸（品牌 + 每张一个功能词，同图不与品牌重复）、手机微旋转 + 左右交替、背景噪点；
 6. 用法：python3 make_posters.py --config /abs/path/config.json
    可选 --out 覆盖输出目录。定稿交付物只读，新 APP 一律写新目录。
+7. **边缘抗锯齿（错误档案 #27）**：hand_line / make_sticker 已内置 4× 超采样，
+   禁止回退到 1× d.line 或 1× 硬边贴纸；改动时保持「输出尺寸探测锁定」与
+   composite_at 系返回值必须接收（im = hand_line(im, ...)）。
 """
 import argparse
 import json
@@ -190,8 +193,14 @@ def add_phone(cfg, canvas, phone, x, y, tilt=0):
     return composite_at(canvas, phone, x, y)
 
 
-def hand_line(d, p1, p2, width, color, seed, wobble=7):
-    """马克笔抖动线：固定 seed 可复现，模拟手画下划线。"""
+def hand_line(canvas, p1, p2, width, color, seed, wobble=7):
+    """马克笔抖动线：4× 局部超采样抗锯齿，返回新画布（调用方必须接收）。
+
+    点集算法 / seed / 线宽与定稿完全一致。1× 直接 d.line 是零抗锯齿的二值硬边，
+    27 个抖动点让每个折角都是阶梯（错误档案 #27）。改为：线附近局部 4× 透明层
+    绘制 → LANCZOS 缩回 → alpha 合成；只开局部层，避免整图 4× 的内存爆炸。
+    透明层 RGB 预填白色，防止缩放时白线边缘混入黑色产生暗边。
+    """
     rnd = random.Random(seed)
     n = 26
     pts = []
@@ -199,27 +208,56 @@ def hand_line(d, p1, p2, width, color, seed, wobble=7):
         t = i / n
         pts.append((p1[0] + (p2[0] - p1[0]) * t + rnd.uniform(-wobble, wobble),
                     p1[1] + (p2[1] - p1[1]) * t + rnd.uniform(-wobble, wobble)))
-    d.line(pts, fill=color, width=width, joint="curve")
+    S = 4
+    pad = width + 24
+    x0 = int(min(q[0] for q in pts)) - pad
+    y0 = int(min(q[1] for q in pts)) - pad
+    x1 = int(max(q[0] for q in pts)) + pad
+    y1 = int(max(q[1] for q in pts)) + pad
+    lw, lh = x1 - x0, y1 - y0
+    big = Image.new("RGBA", (lw * S, lh * S), (255, 255, 255, 0))
+    ImageDraw.Draw(big, "RGBA").line(
+        [((q[0] - x0) * S, (q[1] - y0) * S) for q in pts],
+        fill=color, width=width * S, joint="curve")
+    layer = big.resize((lw, lh), Image.LANCZOS)
+    return composite_at(canvas, layer, x0, y0)
 
 
 def make_sticker(cfg, text, size, tilt):
-    """白色贴纸：白底圆角 + 深蓝得意黑字 + 微旋转。
+    """白色贴纸：4× 超采样抗锯齿 + 透明区预填白色，规格与输出尺寸完全不变。
 
-    居中做法：textbbox 返回墨迹精确 bbox，卡片 = 墨迹 + 四边等宽 padding，
-    文字锚点反推 → 上下左右严格居中。严禁高度再「+N 留余量」：
-    余量全落底部，文字会整体偏上（错误档案 #23）。
+    居中做法（错误档案 #23，不可回退）：textbbox 返回墨迹精确 bbox，
+    卡片 = 墨迹 + 四边等宽 padding，文字锚点反推 → 上下左右严格居中；
+    严禁高度再「+N 留余量」，否则余量全落底部、文字整体偏上。
+
+    抗锯齿（错误档案 #27）：原 1× 硬边 rounded_rectangle/text 再对 RGBA 做 BICUBIC
+    旋转，透明区 RGB=(0,0,0) 与白底插值出毛刺暗边，半透明白底叠噪点更显锯齿。
+    现 4× 绘制（字号/pad/圆角同步放大）→ 4× 旋转 → LANCZOS 缩回；
+    输出尺寸用原 1× 逻辑探测锁定，保证所有贴纸的位置与尺寸零变化。
     """
     st = cfg["sticker"]
+    S = 4
     tmp = ImageDraw.Draw(Image.new("RGBA", (10, 10)))
+
+    # 探测原实现的旋转后尺寸：只为锁定输出尺寸，保证布局零变化
     box = tmp.textbbox((0, 0), text, font=fs(cfg, size))
     tw, th = box[2] - box[0], box[3] - box[1]
-    card = Image.new("RGBA", (tw + st["pad_x"] * 2, th + st["pad_y"] * 2), (0, 0, 0, 0))
+    probe = Image.new("RGBA", (tw + st["pad_x"] * 2, th + st["pad_y"] * 2), (0, 0, 0, 0))
+    target_size = probe.rotate(tilt, expand=True, resample=Image.BICUBIC).size
+
+    # 4× 绘制；透明区 RGB 预填白色，旋转/缩放插值不再产生暗边
+    f_big = fs(cfg, size * S)
+    tb = tmp.textbbox((0, 0), text, font=f_big)
+    bw, bh = tb[2] - tb[0], tb[3] - tb[1]
+    card = Image.new("RGBA", (bw + st["pad_x"] * 2 * S, bh + st["pad_y"] * 2 * S),
+                     (255, 255, 255, 0))
     cd = ImageDraw.Draw(card)
     cd.rounded_rectangle((0, 0, card.width - 1, card.height - 1),
-                         radius=st["radius"], fill=tuple(st["fill"]))
-    cd.text((st["pad_x"] - box[0], st["pad_y"] - box[1]), text,
-            font=fs(cfg, size), fill=tuple(cfg["colors"]["ink_blue"]))
-    return card.rotate(tilt, expand=True, resample=Image.BICUBIC)
+                         radius=st["radius"] * S, fill=tuple(st["fill"]))
+    cd.text((st["pad_x"] * S - tb[0], st["pad_y"] * S - tb[1]), text,
+            font=f_big, fill=tuple(cfg["colors"]["ink_blue"]))
+    rot = card.rotate(tilt, expand=True, resample=Image.BICUBIC)
+    return rot.resize(target_size, Image.LANCZOS)
 
 
 def paste_sticker(cfg, canvas, sticker, x, y):
@@ -259,9 +297,9 @@ def make_poster(cfg, p, idx, total, frame, clean):
     # 马克笔下划线
     y_line = ty + p.get("size1", 236) + 64 + p.get("size2", 176) + 66
     x2 = tx + p.get("l2_dx", 24) + s2.getlength(p["l2"])
-    hand_line(d, (tx + p.get("l2_dx", 24) + 6, y_line),
-              (x2 + rnd.uniform(30, 90), y_line + rnd.uniform(-8, 8)),
-              16, WHITE, seed=1000 + idx, wobble=6)
+    im = hand_line(im, (tx + p.get("l2_dx", 24) + 6, y_line),
+                   (x2 + rnd.uniform(30, 90), y_line + rnd.uniform(-8, 8)),
+                   16, WHITE, seed=1000 + idx, wobble=6)
 
     # 贴纸：品牌（每张必有）+ 功能词（可选，同图不与品牌重复）
     brand = make_sticker(cfg, cfg["app_name"], 116, -4)

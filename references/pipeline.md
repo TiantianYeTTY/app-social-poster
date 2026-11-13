@@ -101,7 +101,21 @@ grep -nE "小组件|没听清的题|智能分段|不保存课堂音频|不上传
 ```
 都应归零（用户定稿句与用户点名钩子词除外）。
 
-### 5. 交付清单
+### 5. 边缘光滑（错误档案 #27）
+```bash
+python3 - <<'EOF'
+from PIL import Image
+import importlib.util
+spec = importlib.util.spec_from_file_location("mp", "scripts/make_posters.py")
+mp = importlib.util.module_from_spec(spec); spec.loader.exec_module(mp)
+blank = Image.new("RGBA", (2160, 2880), (0, 0, 0, 0))
+out = mp.hand_line(blank, (180, 960), (1100, 964), 16, mp.WHITE, seed=1001, wobble=6)
+print("过渡像素", sum(out.getchannel("A").histogram()[1:255]))   # 必须 > 0
+EOF
+```
+裁切放大贴纸圆角/文字与下划线目视无阶梯；贴纸输出尺寸与 1× 版一致。
+
+### 6. 交付清单
 `ls` 输出目录：`01_..png` … `0N_..png`、`00_整套总览.jpg`、`发布文案.md`（**2 组：标题+正文**）、可复跑脚本。
 
 ## 技术坑速查
@@ -119,6 +133,9 @@ grep -nE "小组件|没听清的题|智能分段|不保存课堂音频|不上传
 | 圆角处露出方形截图角 | 屏幕四角发白/发灰 | 截图 alpha 乘圆角 mask（半径 145） |
 | 换文案后旧图残留 | 目录里两套图 | `main()` 自动删 `^\d{2}_.*\.png$` |
 | `anchor="lt"` 逐字 vs 整行 | 只有扁字错位 | 别混用两种绘制方式 |
+| `ImageDraw` 1× 硬边 | 贴纸圆角/下划线放大有阶梯毛刺 | 4× 局部超采样 + LANCZOS 缩回（错误档案 #27） |
+| 透明区 RGB=(0,0,0) 参与旋转插值 | 白边发灰发暗、有毛刺 | 透明层与贴纸卡片预填 `(255,255,255,0)` |
+| `hand_line` 改签名后仍传 `d` 且不接收返回值 | 下划线**静默消失** | `im = hand_line(im, ...)`；之后用 `d` 画字要重新 `ImageDraw.Draw(im)` |
 
 ## 交付后
 
